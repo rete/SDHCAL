@@ -100,16 +100,23 @@ public:
 	 */
 	void reset();
 
+	/**
+	 *  @brief  Get the spill time of this event.
+	 *          Valid only for test beam data
+	 */
+	unsigned long long getSpillTime(EVENT::LCEvent *pLCEvent, EVENT::LCCollection *pLCCollection);
 
 protected:
-
+	// global variables
 	int                             m_nProcessedEvents;
 	std::string                     m_decoderString;
 	std::string                     m_sdhcalCollectionName;
 	std::vector<std::string>        m_ijkEncoding;
 
+	// list of calorimeter hits in the current event
 	std::vector<CalorimeterHit*>    m_caloHitCollection;
 
+	// processor variables to cut on
 	int                             m_nbOfLayers;
 	int                             m_nCells0;
 	int                             m_nCells1;
@@ -124,6 +131,9 @@ protected:
 	int                             m_nHitsInCentralCells;
 	int                             m_nMultiParticleEvents;
 	std::vector<int>                m_evtIdMultiEvent;
+	unsigned long long              m_lastBCID;
+	unsigned long long              m_referenceBCID;
+	double                          m_spillTotalTimeCut;
 
 
 	// processor cut parameters.
@@ -140,6 +150,7 @@ protected:
 	double     m_barycenterPositionCut;
 	double     m_cosThetaCut;
 	int        m_neutralFirstLayerCut;
+	double     m_spillTimeCut;
 
 };
 

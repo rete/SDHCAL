@@ -117,6 +117,11 @@ CutProcessor::CutProcessor() :
 				 m_neutralFirstLayerCut,
 				 static_cast<int> (5) );
 
+	registerProcessorParameter("SpillTimeCut",
+				 "cut on the spill event time (unit seconds)",
+				 m_spillTimeCut,
+				 static_cast<double> (60) ); // 60 seconds means no cut
+
 	registerProcessorParameter("DecoderString" ,
 				 "decoder string for cell ID decoder" ,
 				 m_decoderString,
@@ -137,18 +142,26 @@ CutProcessor::CutProcessor() :
 				 m_ijkEncoding,
 				 ijkVec);
 
+	m_lastBCID = 0;
+	m_referenceBCID = 0;
+	m_spillTotalTimeCut = 5*std::pow(10.0, 9); // 5 seconds between last in event in spill and first event in next spill
 }
+
+//-------------------------------------------------------------------------------------------------
 
 CutProcessor::~CutProcessor()
 {
 	/* nop */
 }
 
+//-------------------------------------------------------------------------------------------------
 
 int CutProcessor::ijkToKey(const int i , const int j , const int k)
 {
 	return 100*100*k+100*j+i;
 }
+
+//-------------------------------------------------------------------------------------------------
 
 std::vector<int> CutProcessor::keyToIJK( const int &key )
 {
@@ -160,12 +173,14 @@ std::vector<int> CutProcessor::keyToIJK( const int &key )
 	return vec;
 }
 
+//-------------------------------------------------------------------------------------------------
 
 bool CutProcessor::sortByLayer( EVENT::CalorimeterHit *caloHit1 , EVENT::CalorimeterHit *caloHit2 )
 {
 	return ( caloHit1->getPosition()[2] < caloHit2->getPosition()[2] );
 }
 
+//-------------------------------------------------------------------------------------------------
 
 void CutProcessor::init()
 {
@@ -178,12 +193,14 @@ void CutProcessor::init()
 	printParameters();
 }
 
+//-------------------------------------------------------------------------------------------------
 
 void CutProcessor::processRunHeader( LCRunHeader* run )
 {
 	/* nop */
 }
 
+//-------------------------------------------------------------------------------------------------
 
 void CutProcessor::processEvent( EVENT::LCEvent * evt )
 {
@@ -225,6 +242,19 @@ void CutProcessor::processEvent( EVENT::LCEvent * evt )
 	std::vector<ThreeVector> positions;
 
 	UTIL::CellIDDecoder<CalorimeterHit> cellIdDecoder(pCollection);
+
+	unsigned long long spillEventTime = getSpillTime(evt, pCollection);
+
+	streamlog_out(DEBUG) << "Time structure : " << std::endl
+			<< "spill event time : " << spillEventTime*200 << " ns" << std::endl
+			<< "spill event time CUT : " << m_spillTimeCut*std::pow(10.0, 9) << " ns"
+			<< std::endl;
+
+	if(m_spillTimeCut*std::pow(10.0, 9) < spillEventTime*200)
+	{
+		streamlog_out(DEBUG) << "Skipping event - SpillEventTime cut" << std::endl;
+		throw marlin::SkipEventException(this);
+	}
 
 	for(unsigned int i=0 ; i<pCollection->getNumberOfElements() ; i++)
 	{
@@ -487,14 +517,14 @@ void CutProcessor::processEvent( EVENT::LCEvent * evt )
 	}
 }
 
-//---------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 
 void CutProcessor::check( LCEvent *evt )
 {
 	/* nop */
 }
 
-//---------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 
 void CutProcessor::end()
 {
@@ -508,7 +538,7 @@ void CutProcessor::end()
 	}
 }
 
-//---------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 
 bool CutProcessor::isSingleParticle()
 {
@@ -614,7 +644,7 @@ bool CutProcessor::isSingleParticle()
 	return largeRMSCounter < largeRMSCounterCut ? true : false;
 }
 
-//---------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 
 double CutProcessor::getFractalDimension()
 {
@@ -631,7 +661,7 @@ double CutProcessor::getFractalDimension()
 	return f3D/7.0;
 }
 
-//---------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 
 int CutProcessor::nHitsInCube( int cubeSize )
 {
@@ -658,7 +688,63 @@ int CutProcessor::nHitsInCube( int cubeSize )
 	return ncube;
 }
 
-//---------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
+
+unsigned long long CutProcessor::getSpillTime(EVENT::LCEvent *pLCEvent, EVENT::LCCollection *pLCCollection)
+{
+	  unsigned long long bcid;
+	  unsigned long long bcid1;
+	  unsigned long long bcid2;
+	  unsigned long long spillEventTime;
+
+	  bcid1 = pLCEvent->parameters().getIntVal("bcid1");
+	  bcid2 = pLCEvent->parameters().getIntVal("bcid2");
+
+	  unsigned long long shift = 16777216ULL;
+	  bcid = bcid1*shift + bcid2; //trigger time
+
+	  // m_referenceBCID = absolute bcid of 1st physical event in spill
+
+	  // first event
+	  if(m_lastBCID == 0)
+	  {
+		  spillEventTime = bcid;
+		  m_referenceBCID = 0;
+
+		  streamlog_out( DEBUG ) << "event : " << pLCEvent->getEventNumber() + 1
+				  << " ; first event time : " << spillEventTime
+				  << " ; first reference : " << m_referenceBCID
+				  << std::endl;
+	  }
+	  // in spill case
+	  else if( (bcid - m_lastBCID)*200 < m_spillTotalTimeCut )
+	  {
+		  spillEventTime = bcid - m_referenceBCID;
+
+		  streamlog_out( DEBUG ) << "event : " << pLCEvent->getEventNumber() + 1
+				  << " ; reference : " << m_referenceBCID
+				  << " ; time to the spill start : " << spillEventTime
+				  << std::endl;
+	  }
+	  // new spill case !
+	  else
+	  {
+		  m_referenceBCID = bcid;
+		  spillEventTime = 0;
+
+		  streamlog_out( DEBUG ) << "event : " << pLCEvent->getEventNumber() + 1
+				  << " ; distance to the previous event : " << bcid - m_lastBCID
+				  << " ; New reference : " << m_referenceBCID
+				  << " ; time to the spill start : " << spillEventTime
+				  << std::endl;
+	  }
+
+	  m_lastBCID = bcid;
+
+	  return spillEventTime;
+}
+
+//-------------------------------------------------------------------------------------------------
 
 void CutProcessor::reset()
 {
@@ -674,5 +760,7 @@ void CutProcessor::reset()
 	m_cog.clear();
 	m_caloHitCollection.clear();
 }
+
+//-------------------------------------------------------------------------------------------------
 
 

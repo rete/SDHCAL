@@ -3,24 +3,16 @@
 
 	<execute>
 	  <processor name="MyCutProcessor"/>
-<!--	  <processor name="MyLCIOOutputProcessor"/> -->
+      <processor name="MyLCIOOutputProcessor"/>
 	</execute>
 	
-	<!-- 
-	      /lyoserv/group/ilc/rete/data/sim/overlayevent/OverlayEvent_pi-_10GeV_neutral_30GeV_charged_10cm_cut.slcio
-	       /lyoserv/group/ilc/rete/data/testbeam/overlayevent/OverlayEvent_pi-_715747_neutral_715693_charged_30cm_cut.slcio
-		    /lyoserv/group/ilc/rete/data/sim/pi-/single_pi-_20GeV_cut.slcio
-		    /home/rete/soft/ArborPFA/head/output/OverlayEvent/OverlayEvent_pi-_10GeV_neutral_30GeV_charged_10cm_cut.slcio
-	  	/lyoserv/group/ilc/rete/data/testbeam/pi-/TDHCAL_715693_cut.slcio
-	 	/lyoserv/group/ilc/rete/data/testbeam/trivent/TDHCAL_715693.slcio
-	-->
-
 	<global>
 	  <parameter name="LCIOInputFiles">
-	  	  	/lyoserv/group/ilc/rete/data/testbeam/trivent/TDHCAL_715693.slcio
+	  
+		/home/rete/data/sdhcaldata/testbeam/SeptAug2012/TRIVENT/TDHCAL_715693.slcio
 
 	  </parameter>
-	  <parameter name="GearXMLFile" value="/home/rete/soft/ArborPFA/head/xml/SDHCALGearFile.xml"/>
+	  <parameter name="GearXMLFile" value="/home/rete/soft/SDHCAL/xml/SDHCALGearFile.xml"/>
 	  <parameter name="MaxRecordNumber" value="0"/>
 	  <parameter name="SkipNEvents" value="0"/>
 	  <parameter name="SupressCheck" value="false"/>
@@ -34,31 +26,32 @@
 	
 	  <parameter name="SDHCALCollectionName" type="string" lcioInType="CalorimeterHit"> SDHCAL_HIT </parameter>
 	  
-	  <parameter name="NHitCut" type="int"> 0 </parameter>
-		<parameter name="NHitOverNLayerCut" type="double"> 3 </parameter>
-		<parameter name="LayerFractionCut" type="double"> 0.2 </parameter>
-		<parameter name="RadiusOverCog2Cut" type="double"> 0.4 </parameter>
-		<parameter name="ShowerStartingLayerCut" type="int"> 4 </parameter>
-		<parameter name="NTouchedLayersCut" type="int"> 8 </parameter>
-		<parameter name="FractalTimesCentralCellsCut" type="double"> 0 </parameter>
-		<parameter name="NHolesCut" type="int"> 1 </parameter>
-		<parameter name="NHitEdgePercentCut" type="double"> 0.5 </parameter>
-		<parameter name="BarycenterPositionCut" type="double"> 24.0 </parameter>
-		<parameter name="LargeRMSCut" type="double"> 4.0 </parameter>
-		<parameter name="CosThetaCut" type="double"> 0.95 </parameter>
-		<parameter name="NeutralFirstLayerCut" type="int"> 5 </parameter>
-		
-		<parameter name="DecoderString" type="string"> M:3,S-1:3,I:9,J:9,K-1:6 </parameter>
-		<parameter name="IJKEncoding"   type="StringVec"> I J K-1 </parameter>
+	      <parameter name="NHitCut" type="int"> 10 </parameter>
+          <parameter name="NHitOverNLayerCut" type="double"> 4 </parameter>
+          <parameter name="LayerFractionCut" type="double"> 0.2 </parameter>
+          <parameter name="RadiusOverCog2Cut" type="double"> 0.4 </parameter>
+          <parameter name="ShowerStartingLayerCut" type="int"> 4 </parameter>
+          <parameter name="NTouchedLayersCut" type="int"> 8 </parameter>
+          <parameter name="FractalTimesCentralCellsCut" type="double"> 0 </parameter>
+          <parameter name="NHolesCut" type="int"> 1 </parameter>
+          <parameter name="NHitEdgePercentCut" type="double"> 0.5 </parameter>
+          <parameter name="BarycenterPositionCut" type="double"> 17.0 </parameter>
+          <parameter name="LargeRMSCut" type="double"> 4.0 </parameter>
+          <parameter name="CosThetaCut" type="double"> 0.95 </parameter>
+          <parameter name="NeutralFirstLayerCut" type="int"> 3 </parameter>
+          <parameter name="SpillTimeCut" type="double"> 3 </parameter>
+          
+          <parameter name="DecoderString" type="string"> M:3,S-1:3,I:9,J:9,K-1:6 </parameter>
+          <parameter name="IJKEncoding"   type="StringVec"> I J K-1 </parameter>
 	  
-	  <parameter name="Verbosity" options="DEBUG0-4,MESSAGE0-4,WARNING0-4,ERROR0-4,SILENT"> DEBUG </parameter>
+		  <parameter name="Verbosity" options="DEBUG0-4,MESSAGE0-4,WARNING0-4,ERROR0-4,SILENT"> MESSAGE </parameter>
 	  
 	</processor>
 	
 	
 	<processor name="MyLCIOOutputProcessor" type="LCIOOutputProcessor">
 	
-	  <parameter name="LCIOOutputFile" type="string"> outputFile.slcio </parameter>
+	  <parameter name="LCIOOutputFile" type="string"> outputFile_SC3sec.slcio </parameter>
 	  <parameter name="LCIOWriteMode" type="string"> WRITE_NEW </parameter>
 	  <parameter name="KeepCollectionNames" type="string"> SDHCAL_HIT </parameter>
 	  
