@@ -10,27 +10,18 @@
 
 #include <iostream>
 #include <map>
-#include <vector>
+
+// sdhcal
+#include "Typedef.h"
 
 class TTree;
 class TBranch;
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-typedef std::vector<float>  VectorFloat;
-typedef std::vector<double> VectorDouble;
-typedef std::vector<int>    VectorInt;
-
 class TTreeWrapper 
 {
 public:
-
-	class BranchHandler;
-
-    typedef std::map<const std::string, BranchHandler*> BranchMap;
-    typedef std::pair<TTree*, BranchMap*> TreeInfo;
-    typedef std::map<const std::string, TreeInfo> TreeMap;
-
     // classes to throw in case of error
     class TreeInsertError {};
     class BranchInsertError {};
@@ -40,8 +31,6 @@ public:
     TTreeWrapper();
 
     ~TTreeWrapper();
-
-    TreeMap::iterator AddTree(const std::string &treeName);
 
     template< typename VarType >
     bool Set(const std::string &treeName, const std::string &branchName, VarType value);
@@ -114,13 +103,15 @@ public:
         std::string             m_branchName;               ///<
     };
 
-private:
+    typedef std::map<const std::string, BranchHandler*> BranchMap;
+    typedef std::pair<TTree*, BranchMap*> TreeInfo;
+    typedef std::map<const std::string, TreeInfo> TreeMap;
+
+    TreeMap::iterator AddTree(const std::string &treeName);
     template< typename VarType >
     BranchMap::iterator AddBranch(const std::string &treeName, const std::string &branchName);
 
-    TreeMap                     m_treeMap;                  ///< holds treenames and ttrees and Branches
-
-    friend class RootFileManager;
+    TreeMap                     m_treeMap;                  ///< holds treenames and ttrees and Branches 
 };
 
 #endif // #ifndef TTREE_WRAPPER_H
