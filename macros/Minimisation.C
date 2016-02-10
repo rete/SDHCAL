@@ -243,7 +243,7 @@ double resolutionFunction(double *x, double *par)
 
 //--------------------------------------------------------------------------------
 
-void processMinimizer(int nEpoch)
+void processMinimizer(int nEpoch, const std::string &fileLocation)
 {
 	if(nEpoch <= 0)
 	{
@@ -255,7 +255,13 @@ void processMinimizer(int nEpoch)
 
 	pMinimizerData = new MinimizerData();
 	// please feel free to modify the directory
-	const std::string fileLocation = "/home/rete/soft/SDHCAL/run/";
+	//	const std::string fileLocation = "/home/rete/soft/SDHCAL/output/minimisation/FTF_BIC/";
+
+	// /home/rete/soft/SDHCAL/output/minimisation/FTFP_BERT_HP/
+	// /home/rete/soft/SDHCAL/output/minimisation/FTF_BIC/
+	// /home/rete/soft/SDHCAL/output/minimisation/TB_SeptAug2012/
+
+	
 	const std::string treeName = "CaloHitAnalysis";
 
 	std::vector<int> energies;
@@ -344,7 +350,7 @@ void processMinimizer(int nEpoch)
  }
 
 	// draw the results !
- TCanvas *pCanvas = new TCanvas();
+	TCanvas *pCanvas = new TCanvas(fileLocation.c_str(), fileLocation.c_str());
  pCanvas->SetWindowSize(1000, 600);
  pCanvas->Divide(2, 1);
 
@@ -373,15 +379,27 @@ void minimize(int nEpoch)
 	std::vector<double> bestParameters;
 
 	// these are by current parameters
-	bestParameters.push_back(0.0442674);
-	bestParameters.push_back(3.95986e-05);
-	bestParameters.push_back(-2.0133e-10);
-	bestParameters.push_back(0.0781586);
-	bestParameters.push_back(-5.9623e-05);
-	bestParameters.push_back(-3.06952e-08);
-	bestParameters.push_back(0.115295);
-	bestParameters.push_back(1.57508e-05);
-	bestParameters.push_back(2.28041e-09);
+	// bestParameters.push_back(0.0442674);
+	// bestParameters.push_back(3.95986e-05);
+	// bestParameters.push_back(-2.0133e-10);
+	// bestParameters.push_back(0.0781586);
+	// bestParameters.push_back(-5.9623e-05);
+	// bestParameters.push_back(-3.06952e-08);
+	// bestParameters.push_back(0.115295);
+	// bestParameters.push_back(1.57508e-05);
+	// bestParameters.push_back(2.28041e-09);
+
+	// from Imad FTFP_BERT_HP
+	bestParameters.push_back( 0.0293659   );
+	bestParameters.push_back( 2.96392e-05 );
+	bestParameters.push_back(-2.051233e-08);
+	bestParameters.push_back( 0.0925993   );
+	bestParameters.push_back( 1.12284e-05 );
+	bestParameters.push_back(-2.016464e-09);	
+	bestParameters.push_back( 0.166332    );
+	bestParameters.push_back( 3.08655e-05 );
+	bestParameters.push_back( 2.97939e-08 );
+	
 
 	std::vector<double> tryParameters(bestParameters);
 
@@ -448,6 +466,7 @@ void minimize(int nEpoch)
  std::cout << "Minimum reached at : " << minimum << std::endl;
 
  std::vector<double> hardcodedParameters;
+ // from Imad TB
  hardcodedParameters.push_back(0.039081);
  hardcodedParameters.push_back(3.23877e-05);
  hardcodedParameters.push_back(-2.04628e-08); 
@@ -458,12 +477,24 @@ void minimize(int nEpoch)
  hardcodedParameters.push_back(2.40615e-05);
  hardcodedParameters.push_back(2.80403e-08);
 
+
+ // from Imad FTFP_BERT_HP
+ // hardcodedParameters.push_back( 0.0293659   );
+ // hardcodedParameters.push_back( 2.96392e-05 );
+ // hardcodedParameters.push_back(-2.051233e-08);
+ // hardcodedParameters.push_back( 0.0925993   );
+ // hardcodedParameters.push_back( 1.12284e-05 );
+ // hardcodedParameters.push_back(-2.016464e-09);	
+ // hardcodedParameters.push_back( 0.166332    );
+ // hardcodedParameters.push_back( 3.08655e-05 );
+ // hardcodedParameters.push_back( 2.97939e-08 );
+ 
  // uncomment if you want to use these parameters
  bestParameters = hardcodedParameters;
 
  for(unsigned int b=0 ; b<bestParameters.size() ; b++)
  	std::cout << "Best parameter " << b << " is : " << bestParameters.at(b) << std::endl;
 
-pMinimizerData->m_bestParameters = bestParameters;
+ pMinimizerData->m_bestParameters = bestParameters;
 }
 

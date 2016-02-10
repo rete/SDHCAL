@@ -40,7 +40,7 @@ void minuitFunction(int& nDim, double *gout, double& result, double par[], int f
 
 double resolutionFunction(double *x, double *par);
 
-void processMinimizer(int nEpoch = 1);
+void processMinimizer(int nEpoch = 1, const std::string &fileLocation = "");
 
 void minimize(int nEpoch);
 
